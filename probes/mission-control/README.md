@@ -1,6 +1,8 @@
 # Mission Control state feasibility probe
 
-**Stage 1 only. Not a replacement app. Not yet validated for input interception.**
+**Read-only diagnostic. Not a replacement app and never intercepts input.**
+
+The stage 2 app now uses the same AX reader in `Sources/DeskSwayCore/MissionControlReader.swift`. See the [app README](../../README.md) for the local trial and its pending acceptance.
 
 The macOS 27.2 single-display state checks have now been compared with user-observed screen states. See the [real-device validation report](../../docs/phase1-validation.ja.md) for successful cases, transient unknowns, measurements, and untested cases.
 
@@ -33,7 +35,7 @@ If output reports `state=unknown accessibilityPermissionMissing`, this is a perm
 
 The source reads role, identifier, and children only. It does not request titles, text values, screenshots, URLs, or keyboard content. Output contains elapsed time, duration of the AX scan, counts, allowlisted structural identifiers, and numeric AX errors. App/window thumbnail identifiers are not printed. A heartbeat is printed every five seconds and changes are printed immediately after the detecting scan.
 
-The traversal is bounded to 200 nodes and depth 4, with a 150 ms AX messaging timeout per target. This is a diagnostic limit, not a guarantee on total scan latency: multiple calls may delay a poll. No input-handling logic should run on this polling thread in a future app.
+The traversal is bounded to 200 nodes and depth 4, with a 150 ms AX messaging timeout on each visited element. This is a diagnostic limit, not a guarantee on total scan latency: multiple calls may delay a poll. No input-handling logic should run on this polling thread in the app.
 
 ## API and compatibility boundary
 
@@ -65,7 +67,7 @@ Keep BTT enabled: this probe cannot double-trigger a Space move. Do not change M
 
 For latency, record visible transition onset and the first matching output against a common time reference. `scanMS` is the read time, not end-to-end latency. A 200 ms polling target also does not establish a measured 200 ms bound.
 
-The Stage 2 gate requires screen/log comparison establishing Mission Control vs App Exposé distinction, reliable open/close recovery, and stable state during Space changes. Those basic state checks passed in the macOS 27.2 single-display run documented in the report; input interception has not been implemented or accepted. Consult the owner before proceeding if private APIs prove necessary or the supported public-API/undocumented-schema boundary is unacceptable.
+The Stage 2 gate requires screen/log comparison establishing Mission Control vs App Exposé distinction, reliable open/close recovery, and stable state during Space changes. Those basic state checks passed in the macOS 27.2 single-display run documented in the report; the separate stage 2 app implements input interception, but physical-mouse acceptance is pending. Consult the owner before proceeding if private APIs prove necessary or the supported public-API/undocumented-schema boundary is unacceptable.
 
 ## Stop and remove
 
