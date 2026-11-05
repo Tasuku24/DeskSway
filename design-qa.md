@@ -61,3 +61,9 @@ Language options are Follow System Settings, 日本語, and English. The selecti
 Verified the full native interaction from system-following English to Japanese via selection, Save, and Restart App. Verified returning to Follow System Settings via the same path. The final app is running in system-following mode. Added regression coverage for successful/failed language saves and updated tab draft-preservation/layout tests. All 53 tests passed, as did the release build and signing.
 
 Final result: passed for tabs and manual language switching. Permission recovery and physical input verification remain open.
+
+## 2026-11-05 acceptance update
+
+The maintainer subsequently reported that all real-device acceptance checks had passed. Earlier statements that physical input and permission recovery remain open describe the previous review state. This report does not establish additional platform or device compatibility.
+
+The current running app was observed with Accessibility, Input Monitoring and Key Posting all recognized. Both native settings tabs were inspected and captured in `docs/images/` for the README. The five settings-window tests passed again. Negative-width and conflicting-constraint warnings still reproduce during the tests and remain unresolved; the inspected live tabs showed no visible clipping.
