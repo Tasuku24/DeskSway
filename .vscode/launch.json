@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:DeskSway}",
+      "name": "Debug DeskSway",
+      "target": "DeskSway",
+      "configuration": "debug",
+      "preLaunchTask": "swift: Build Debug DeskSway"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:DeskSway}",
+      "name": "Release DeskSway",
+      "target": "DeskSway",
+      "configuration": "release",
+      "preLaunchTask": "swift: Build Release DeskSway"
+    }
+  ]
+}
