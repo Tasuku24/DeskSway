@@ -190,10 +190,15 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
             view.widthAnchor.constraint(equalTo: inputSections.widthAnchor).isActive = true
         }
         let permissions = vertical([permissionSummary, permissionDetails], spacing: 16)
+        let tabHeight: CGFloat = 430
+        // AppKit sizes inserted tab contents before the first Auto Layout pass.
+        // Seed both tabs with real geometry, including the initially hidden tab.
+        tabs.setFrameSize(NSSize(width: content.bounds.width - 56, height: tabHeight))
         for (title, body) in [(L("一般"), inputSections), (L("権限"), permissions)] {
             let item = NSTabViewItem(identifier: title)
             item.label = title
-            let container = NSView()
+            let container = NSView(frame: tabs.contentRect)
+            container.autoresizingMask = [.width, .height]
             body.translatesAutoresizingMaskIntoConstraints = false
             container.addSubview(body)
             NSLayoutConstraint.activate([
@@ -205,7 +210,7 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
             item.view = container
             tabs.addTabViewItem(item)
         }
-        tabs.heightAnchor.constraint(equalToConstant: 430).isActive = true
+        tabs.heightAnchor.constraint(equalToConstant: tabHeight).isActive = true
         let stack = SettingsContentStack(views: [header, tabs, feedback])
         stack.orientation = .vertical
         stack.alignment = .leading

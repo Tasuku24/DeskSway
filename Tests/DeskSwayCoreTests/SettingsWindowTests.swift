@@ -66,6 +66,23 @@ final class SettingsWindowTests: XCTestCase {
     }
 
     @MainActor
+    func testTabsHaveUsableContentBoundsBeforeFirstLayout() async throws {
+        _ = NSApplication.shared
+        let controller = SettingsWindow()
+        let content = try XCTUnwrap(controller.window?.contentView)
+        let tabs = try XCTUnwrap(descendants(of: content).compactMap { $0 as? NSTabView }.first)
+        // AppKit sizes tab contents as soon as they are inserted, before the
+        // window's first layout pass. A zero-size tab view produces invalid frames.
+        XCTAssertGreaterThan(tabs.contentRect.width, 0)
+        XCTAssertGreaterThan(tabs.contentRect.height, 0)
+        for item in tabs.tabViewItems {
+            let body = try XCTUnwrap(item.view)
+            XCTAssertGreaterThan(body.bounds.width, 0, item.label)
+            XCTAssertGreaterThan(body.bounds.height, 0, item.label)
+        }
+    }
+
+    @MainActor
     func testSettingsLayoutAndAppearance() async throws {
         let savedLanguage = InterfaceLanguage.saved
         defer { InterfaceLanguage.saved = savedLanguage }
@@ -73,16 +90,19 @@ final class SettingsWindowTests: XCTestCase {
         let controller = SettingsWindow()
         let window = try XCTUnwrap(controller.window)
         let content = try XCTUnwrap(window.contentView)
+        let tabs = try XCTUnwrap(descendants(of: content).compactMap { $0 as? NSTabView }.first)
         controller.update(SettingsStatus(running: true, accessibility: true, listening: true, posting: true,
                                          summary: "待機中", detection: "通常画面（変換対象外）"))
         for (name, appearance, size, expanded) in [
             ("light", NSAppearance.Name.aqua, NSSize(width: 800, height: 700), false),
             ("dark", NSAppearance.Name.darkAqua, NSSize(width: 800, height: 700), false),
-            ("expanded", NSAppearance.Name.aqua, NSSize(width: 800, height: 700), true)
+            ("expanded", NSAppearance.Name.aqua, NSSize(width: 800, height: 700), true),
+            ("larger", NSAppearance.Name.aqua, NSSize(width: 1000, height: 850), false),
+            ("minimum-again", NSAppearance.Name.darkAqua, NSSize(width: 800, height: 700), true)
         ] {
             window.appearance = NSAppearance(named: appearance)
             window.setContentSize(size)
-            if expanded { try XCTUnwrap(descendants(of: content).compactMap { $0 as? NSTabView }.first).selectTabViewItem(at: 1) }
+            tabs.selectTabViewItem(at: expanded ? 1 : 0)
             content.layoutSubtreeIfNeeded()
             let save = try XCTUnwrap(button(named: "保存", in: content))
             let saveFrame = save.convert(save.bounds, to: content)
@@ -92,6 +112,12 @@ final class SettingsWindowTests: XCTestCase {
                 where !button.isHiddenOrHasHiddenAncestor {
                 XCTAssertTrue(content.bounds.contains(button.convert(button.bounds, to: content)),
                               "Button must remain visible: \(button.title)")
+            }
+            let selectedContent = try XCTUnwrap(tabs.selectedTabViewItem?.view)
+            for button in descendants(of: selectedContent).compactMap({ $0 as? NSButton })
+                where !button.isHiddenOrHasHiddenAncestor {
+                XCTAssertTrue(selectedContent.bounds.contains(button.convert(button.bounds, to: selectedContent)),
+                              "Button must fit its tab at \(name) size: \(button.title)")
             }
         }
     }
