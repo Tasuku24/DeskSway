@@ -67,3 +67,9 @@ Final result: passed for tabs and manual language switching. Permission recovery
 The maintainer subsequently reported that all real-device acceptance checks had passed. Earlier statements that physical input and permission recovery remain open describe the previous review state. This report does not establish additional platform or device compatibility.
 
 The current running app was observed with Accessibility, Input Monitoring and Key Posting all recognized. Both native settings tabs were inspected and captured in `docs/images/` for the README. The five settings-window tests passed again. Negative-width and conflicting-constraint warnings still reproduce during the tests and remain unresolved; the inspected live tabs showed no visible clipping.
+
+## Layout warning resolution for the initial release
+
+Detailed AppKit logging identified initial tab/content frames that were too small for their required constraints. A regression test failed on the unselected Permissions tab's zero-size content before the fix. The tab view and both content containers now receive usable initial frames before insertion, with native resizing thereafter.
+
+All 54 tests passed. Layout checks cover both tabs, light and dark appearances, minimum size, a larger window and return to minimum size, including button containment within the selected tab. Detailed diagnostic logging reported zero negative-width, conflicting-constraint or unsatisfiable-constraint messages. The extracted Release app's local ad-hoc signature, license, English/Japanese resources and bundled PDF/ICNS loading were verified.

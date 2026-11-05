@@ -12,6 +12,12 @@ English and Japanese settings, directly recorded shortcuts and scroll directions
 
 Screenshots show one saved configuration; record the shortcuts and mouse directions that match your own setup.
 
+## Install a release
+
+Download the Apple Silicon app ZIP from [GitHub Releases](https://github.com/Tasuku24/DeskSway/releases), extract it, and move `DeskSway.app` into Applications. The automatic “Source code” archives do not contain a built app. See the [Japanese and English installation guide](docs/installation.md) for first-launch approval, input permissions, updates and removal.
+
+Releases are free, ad-hoc signed downloads without Developer ID signing or Apple notarization. macOS may require explicit first-launch approval. The recorded test environment is macOS 27.2 on Apple Silicon; the deployment target of macOS 14 does not guarantee compatibility with other OS versions or Intel Macs.
+
 ## Build and run
 
 The current build was checked with Xcode 27.2 / Swift 6.4.2 on macOS 27.2, arm64. The package's deployment floor is macOS 14; that is **not** a compatibility claim for older OS versions or Intel. Detection relies on undocumented system UI structure and is currently only validated on macOS 27.2 with one display.
@@ -56,4 +62,17 @@ The run/pause choice and shortcuts are saved locally in standard Preferences und
 
 To remove the app, quit it and remove the built `.app`. Remove any permission or login-item entries you added through System Settings. Preferences may be retained; deleting the `local.DeskSway` preferences domain separately resets local settings. No background helper, launch agent or service is installed.
 
-Source is maintained in [Tasuku24/DeskSway](https://github.com/Tasuku24/DeskSway). A public license has not yet been selected. Local ad-hoc builds are not Developer ID-signed or notarized distributions.
+Source is maintained in [Tasuku24/DeskSway](https://github.com/Tasuku24/DeskSway) under the [MIT License](LICENSE). Local ad-hoc builds are not Developer ID-signed or notarized distributions.
+
+## Prepare a release
+
+Run the checks and package an app separately from the local test copy:
+
+```sh
+swift test
+./scripts/package-release.sh 0.1.0-beta.1
+```
+
+The packaging script creates an app ZIP and a matching SHA-256 checksum under `.build/releases/`. The ZIP includes the app, MIT license and bilingual installation guide. It does not overwrite an existing asset or register/replace the running local app. Run it on Apple Silicon for the initial arm64 release. Version labels must match `CFBundleShortVersionString` in `Resources/Info.plist`, optionally with a prerelease suffix.
+
+For the first preview, create a draft GitHub Release for tag `v0.1.0-beta.1` at the verified commit, use the [release notes](docs/releases/v0.1.0-beta.1.md), and attach the ZIP and checksum. Mark it as a prerelease. Making the repository public and publishing the release are separate final steps.
