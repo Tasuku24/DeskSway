@@ -29,13 +29,13 @@ final class InputRecorder {
         stop()
         guard !draining else { return false }
         guard NSApp.isActive, window.isKeyWindow else {
-            onMessage?("設定画面を選択してから、もう一度「記録」を押してください。"); return false
+            onMessage?(L("設定画面を選択してから、もう一度「記録」を押してください。")); return false
         }
         guard CGPreflightListenEventAccess() else {
-            onMessage?("入力監視が認識されていません。下の権限欄で許可し、再確認または再起動してください。"); return false
+            onMessage?(L("入力監視が認識されていません。下の権限欄で許可し、再確認または再起動してください。")); return false
         }
         if case .shortcut = mode, !AXIsProcessTrusted() {
-            onMessage?("キーを安全に記録するにはアクセシビリティの許可が必要です。"); return false
+            onMessage?(L("キーを安全に記録するにはアクセシビリティの許可が必要です。")); return false
         }
         self.mode = mode; self.window = window; keys = ShortcutCapture(); finishing = false
         let mask: CGEventMask = mode == .shortcut
@@ -48,15 +48,15 @@ final class InputRecorder {
             return Unmanaged<InputRecorder>.fromOpaque(context).takeUnretainedValue().handle(type, event)
         }, userInfo: Unmanaged.passUnretained(self).toOpaque()),
               let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0) else {
-            stop(); onMessage?("入力の記録を開始できません。権限の再確認・アプリの再起動を試してください。"); return false
+            stop(); onMessage?(L("入力の記録を開始できません。権限の再確認・アプリの再起動を試してください。")); return false
         }
         self.tap = tap; self.source = source
         CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
         CGEvent.tapEnable(tap: tap, enable: true)
         let center = NotificationCenter.default
-        observers.append(center.addObserver(forName: NSWindow.didResignKeyNotification, object: window, queue: .main) { [weak self] _ in self?.cancel("画面が切り替わったため記録を中止しました。") })
-        observers.append(center.addObserver(forName: NSApplication.didResignActiveNotification, object: nil, queue: .main) { [weak self] _ in self?.cancel("他のアプリへ切り替わったため記録を中止しました。") })
-        let timer = Timer(timeInterval: 15, repeats: false) { [weak self] _ in self?.cancel("入力がなかったため記録を終了しました。もう一度「記録」を押してください。") }
+        observers.append(center.addObserver(forName: NSWindow.didResignKeyNotification, object: window, queue: .main) { [weak self] _ in self?.cancel(L("画面が切り替わったため記録を中止しました。")) })
+        observers.append(center.addObserver(forName: NSApplication.didResignActiveNotification, object: nil, queue: .main) { [weak self] _ in self?.cancel(L("他のアプリへ切り替わったため記録を中止しました。")) })
+        let timer = Timer(timeInterval: 15, repeats: false) { [weak self] _ in self?.cancel(L("入力がなかったため記録を終了しました。もう一度「記録」を押してください。")) }
         RunLoop.main.add(timer, forMode: .common); timeout = timer
         return true
     }
@@ -64,7 +64,7 @@ final class InputRecorder {
         if mode == .shortcut && keys.hasHeldKeys {
             keys.cancel(); draining = true
             timeout?.invalidate(); timeout = nil
-            onMessage?("記録を中止しました。押したキーを離すと終了します。新しいキーは記録しません。")
+            onMessage?(L("記録を中止しました。押したキーを離すと終了します。新しいキーは記録しません。"))
             return
         }
         tearDown()
@@ -80,7 +80,7 @@ final class InputRecorder {
         observers.removeAll(); window = nil
         onStopped?()
     }
-    func cancel(_ message: String = "記録を中止しました。") { stop(); if !draining { onMessage?(message) } }
+    func cancel(_ message: String = L("記録を中止しました。")) { stop(); if !draining { onMessage?(message) } }
     private func finish(_ completion: @escaping () -> Void) {
         guard !finishing else { return }
         finishing = true
@@ -94,7 +94,7 @@ final class InputRecorder {
         guard !finishing, let mode else { return Unmanaged.passUnretained(event) }
         guard type != .tapDisabledByTimeout && type != .tapDisabledByUserInput else {
             tearDown()
-            onMessage?("入力監視が停止しました。押しているキーを離し、権限を再確認してください。")
+            onMessage?(L("入力監視が停止しました。押しているキーを離し、権限を再確認してください。"))
             return Unmanaged.passUnretained(event)
         }
         if !draining && !(NSApp.isActive && window?.isKeyWindow == true) {

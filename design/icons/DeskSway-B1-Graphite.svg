@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="linear-gradient-1" x1="120" y1="80" x2="830" y2="970" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#637180"/>
+      <stop offset="1" stop-color="#303943"/>
+    </linearGradient>
+  </defs>
+  <title>DeskSway B1 Graphite</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path id="Graphite_tile" data-name="Graphite tile" d="M266 64 L758 64 C869.562 64 960 154.438 960 266 L960 758 C960 869.562 869.562 960 758 960 L266 960 C154.438 960 64 869.562 64 758 L64 266 C64 154.438 154.438 64 266 64 Z" fill="url(#linear-gradient-1)"/>
+    <path id="B1_Soft___continuous_S_arrows" data-name="B1 Soft — continuous S arrows" d="M690 300 L690 271 C690 258.333 695.333 256 706 264 L790 330 C798 338 798 346 790 354 L706 420 C695.333 428 690 425.667 690 413 L690 386 L370 386 C302 386 302 470 370 470 L650 470 C846 470 846 730 650 730 L334 730 L334 759 C334 771.667 328.667 774 318 766 L234 700 C226 692 226 684 234 676 L318 610 C328.667 602 334 604.333 334 617 L334 644 L650 644 C718 644 718 558 650 558 L370 558 C170 558 170 300 370 300 Z" fill="#ffffff"/>
+  </g>
+</svg>

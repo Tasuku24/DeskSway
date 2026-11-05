@@ -1,0 +1,181 @@
+[
+  {
+    "id": 1,
+    "ok": true,
+    "result": {
+      "index": 0,
+      "previewMode": "default"
+    }
+  },
+  {
+    "id": 2,
+    "ok": true,
+    "result": {
+      "id": 2
+    }
+  },
+  {
+    "id": 3,
+    "ok": true,
+    "result": {
+      "objects": 1
+    }
+  },
+  {
+    "id": 4,
+    "ok": true,
+    "result": {
+      "objects": 1
+    }
+  },
+  {
+    "id": 5,
+    "ok": true,
+    "result": null
+  },
+  {
+    "id": 6,
+    "ok": true,
+    "result": {
+      "objects": 1
+    }
+  },
+  {
+    "id": 7,
+    "ok": true,
+    "result": {
+      "id": 3
+    }
+  },
+  {
+    "id": 8,
+    "ok": true,
+    "result": {
+      "objects": 1
+    }
+  },
+  {
+    "id": 9,
+    "ok": true,
+    "result": {
+      "objects": 1
+    }
+  },
+  {
+    "id": 10,
+    "ok": true,
+    "result": null
+  },
+  {
+    "id": 11,
+    "ok": true,
+    "result": {
+      "bytes": 35496,
+      "format": "vectorcraft",
+      "path": "/Users/s26037/Developer/DeskSway/design/icons/DeskSway-B1-Graphite.vectorcraft",
+      "warnings": []
+    }
+  },
+  {
+    "id": 12,
+    "ok": true,
+    "result": {
+      "path": "/Users/s26037/Developer/DeskSway/design/icons/DeskSway-B1-Graphite.svg",
+      "warnings": []
+    }
+  },
+  {
+    "id": 13,
+    "ok": true,
+    "result": {
+      "path": "/Users/s26037/Developer/DeskSway/Resources/Icons/AppIcon-1024.png",
+      "warnings": []
+    }
+  },
+  {
+    "id": 14,
+    "ok": true,
+    "result": {
+      "index": 1,
+      "previewMode": "default"
+    }
+  },
+  {
+    "id": 15,
+    "ok": true,
+    "result": {
+      "id": 2
+    }
+  },
+  {
+    "id": 16,
+    "ok": true,
+    "result": {
+      "objects": 1
+    }
+  },
+  {
+    "id": 17,
+    "ok": true,
+    "result": {
+      "objects": 1
+    }
+  },
+  {
+    "id": 18,
+    "ok": true,
+    "result": null
+  },
+  {
+    "id": 19,
+    "ok": true,
+    "result": {
+      "bytes": 30331,
+      "format": "vectorcraft",
+      "path": "/Users/s26037/Developer/DeskSway/design/icons/DeskSway-MenuBar.vectorcraft",
+      "warnings": []
+    }
+  },
+  {
+    "id": 20,
+    "ok": true,
+    "result": {
+      "path": "/Users/s26037/Developer/DeskSway/design/icons/DeskSway-MenuBar.svg",
+      "warnings": []
+    }
+  },
+  {
+    "id": 21,
+    "ok": true,
+    "result": {
+      "path": "/Users/s26037/Developer/DeskSway/Resources/Icons/MenuBarIcon.pdf",
+      "warnings": []
+    }
+  },
+  {
+    "id": 22,
+    "ok": true,
+    "result": {
+      "path": "/Users/s26037/Developer/DeskSway/design/icons/MenuBar-18.png",
+      "warnings": []
+    }
+  },
+  {
+    "id": 23,
+    "ok": true,
+    "result": {
+      "path": "/Users/s26037/Developer/DeskSway/design/icons/MenuBar-36.png",
+      "warnings": []
+    }
+  },
+  {
+    "id": 24,
+    "ok": true,
+    "result": null
+  },
+  {
+    "id": 25,
+    "ok": true,
+    "result": null
+  }
+]
