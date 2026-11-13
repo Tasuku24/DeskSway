@@ -2,8 +2,91 @@ import XCTest
 import AppKit
 @testable import DeskSway
 import DeskSwayCore
+import ServiceManagement
 
 final class SettingsWindowTests: XCTestCase {
+    @MainActor
+    func testLaunchAtLoginReflectsSystemStatusAndApproval() async throws {
+        _ = NSApplication.shared
+        let controller = SettingsWindow()
+        let content = try XCTUnwrap(controller.window?.contentView)
+        let toggle = try launchAtLoginSwitch(in: content)
+        let approval = try XCTUnwrap(button(named: "ログイン項目を開く…", in: content))
+        var opened = false
+        controller.onOpenLoginItems = { opened = true }
+        for (status, state, needsApproval) in [
+            (SMAppService.Status.notRegistered, NSControl.StateValue.off, false),
+            (.enabled, .on, false), (.requiresApproval, .on, true), (.notRegistered, .off, false),
+            (.notFound, .off, false)
+        ] {
+            controller.update(settingsStatus(loginItem: status))
+            XCTAssertEqual(toggle.state, state)
+            XCTAssertEqual(approval.isHidden, !needsApproval)
+            if needsApproval { approval.performClick(nil) }
+        }
+        XCTAssertTrue(opened)
+    }
+
+    @MainActor
+    func testLaunchAtLoginAppliesImmediatelyWithoutSavingDraft() async throws {
+        _ = NSApplication.shared
+        let controller = SettingsWindow()
+        let content = try XCTUnwrap(controller.window?.contentView)
+        let toggle = try launchAtLoginSwitch(in: content)
+        let slider = try XCTUnwrap(descendants(of: content).compactMap { $0 as? NSSlider }.first)
+        slider.doubleValue = 1.25
+        NSApp.sendAction(try XCTUnwrap(slider.action), to: slider.target, from: slider)
+        var requests: [Bool] = []
+        var systemStatus = SMAppService.Status.notRegistered
+        var saves = 0
+        controller.onSave = { _ in saves += 1 }
+        controller.onSetLaunchAtLogin = {
+            requests.append($0)
+            systemStatus = $0 ? .enabled : .notRegistered
+        }
+        controller.onRefresh = { [weak controller] in controller?.update(self.settingsStatus(loginItem: systemStatus)) }
+        for state in [NSControl.StateValue.on, .off] {
+            toggle.state = state
+            NSApp.sendAction(try XCTUnwrap(toggle.action), to: toggle.target, from: toggle)
+            XCTAssertEqual(toggle.state, state)
+        }
+        XCTAssertEqual(requests, [true, false])
+        XCTAssertEqual(saves, 0)
+        XCTAssertEqual(slider.doubleValue, 1.25)
+    }
+
+    @MainActor
+    func testLaunchAtLoginFailureRestoresSystemStateAndShowsError() async throws {
+        _ = NSApplication.shared
+        let controller = SettingsWindow()
+        let content = try XCTUnwrap(controller.window?.contentView)
+        let toggle = try launchAtLoginSwitch(in: content)
+        controller.onSetLaunchAtLogin = { _ in throw NSError(domain: "LoginItemTest", code: 1,
+                                                            userInfo: [NSLocalizedDescriptionKey: "Registration denied"]) }
+        for status in [SMAppService.Status.notRegistered, .enabled, .requiresApproval] {
+            controller.update(settingsStatus(loginItem: status))
+            let previous = toggle.state
+            controller.onRefresh = { [weak controller] in controller?.update(self.settingsStatus(loginItem: status)) }
+            toggle.state = previous == .on ? .off : .on
+            NSApp.sendAction(try XCTUnwrap(toggle.action), to: toggle.target, from: toggle)
+            XCTAssertEqual(toggle.state, previous)
+            XCTAssertTrue(descendants(of: content).compactMap { $0 as? NSTextField }
+                .contains { $0.stringValue.contains("Registration denied") })
+        }
+    }
+
+    @MainActor
+    private func settingsStatus(loginItem: SMAppService.Status) -> SettingsStatus {
+        SettingsStatus(running: false, accessibility: false, listening: false, posting: false,
+                       summary: "", detection: "", loginItem: loginItem)
+    }
+
+    @MainActor
+    private func launchAtLoginSwitch(in content: NSView) throws -> NSSwitch {
+        try XCTUnwrap(descendants(of: content).compactMap { $0 as? NSSwitch }
+            .first { $0.accessibilityLabel() == L("ログイン時に起動") })
+    }
+
     @MainActor
     func testPostingButtonRequestsPostingRatherThanAccessibility() async throws {
         let savedLanguage = InterfaceLanguage.saved
@@ -96,10 +179,12 @@ final class SettingsWindowTests: XCTestCase {
         for (name, appearance, size, expanded) in [
             ("light", NSAppearance.Name.aqua, NSSize(width: 800, height: 700), false),
             ("dark", NSAppearance.Name.darkAqua, NSSize(width: 800, height: 700), false),
+            ("approval", NSAppearance.Name.aqua, NSSize(width: 800, height: 700), false),
             ("expanded", NSAppearance.Name.aqua, NSSize(width: 800, height: 700), true),
             ("larger", NSAppearance.Name.aqua, NSSize(width: 1000, height: 850), false),
             ("minimum-again", NSAppearance.Name.darkAqua, NSSize(width: 800, height: 700), true)
         ] {
+            controller.update(settingsStatus(loginItem: name == "approval" ? .requiresApproval : .enabled))
             window.appearance = NSAppearance(named: appearance)
             window.setContentSize(size)
             tabs.selectTabViewItem(at: expanded ? 1 : 0)
@@ -118,6 +203,11 @@ final class SettingsWindowTests: XCTestCase {
                 where !button.isHiddenOrHasHiddenAncestor {
                 XCTAssertTrue(selectedContent.bounds.contains(button.convert(button.bounds, to: selectedContent)),
                               "Button must fit its tab at \(name) size: \(button.title)")
+            }
+            for control in descendants(of: selectedContent).compactMap({ $0 as? NSControl })
+                where !control.isHiddenOrHasHiddenAncestor {
+                XCTAssertTrue(selectedContent.bounds.contains(control.convert(control.bounds, to: selectedContent)),
+                              "Control must fit its tab at \(name) size: \(control)")
             }
         }
     }

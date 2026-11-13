@@ -1,6 +1,7 @@
 import AppKit
 import ApplicationServices
 import DeskSwayCore
+import ServiceManagement
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let settings = SettingsStore()
@@ -124,7 +125,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         settingsWindow?.update(SettingsStatus(running: requestedRunning, accessibility: accessibility,
                                               listening: listening, posting: posting,
-                                              summary: bttRunning ? L("BTTを終了してください") : label, detection: state))
+                                              summary: bttRunning ? L("BTTを終了してください") : label, detection: state,
+                                              loginItem: SMAppService.mainApp.status))
     }
     @objc private func toggleRunning() {
         requestedRunning.toggle()
@@ -149,6 +151,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             window.onPosting = { [weak self] in self?.requestPosting() }
             window.onRefresh = { [weak self] in self?.refresh() }
             window.onRestart = { [weak self] in self?.restart() }
+            window.onSetLaunchAtLogin = { enabled in
+                let service = SMAppService.mainApp
+                if enabled {
+                    if service.status != .enabled && service.status != .requiresApproval { try service.register() }
+                } else if service.status != .notRegistered {
+                    try service.unregister()
+                }
+            }
+            window.onOpenLoginItems = { SMAppService.openSystemSettingsLoginItems() }
             settingsWindow = window
         }
         settingsWindow?.present(settings.configuration)

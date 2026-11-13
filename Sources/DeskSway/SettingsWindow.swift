@@ -1,5 +1,6 @@
 import AppKit
 import DeskSwayCore
+import ServiceManagement
 
 private final class SettingsContentStack: NSStackView {
     override var isFlipped: Bool { true }
@@ -12,6 +13,7 @@ struct SettingsStatus {
     var posting: Bool
     var summary: String
     var detection: String
+    var loginItem: SMAppService.Status = .notRegistered
 }
 
 final class SettingsWindow: NSWindowController, NSWindowDelegate {
@@ -23,6 +25,8 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
     var onPosting: (() -> Void)?
     var onRefresh: (() -> Void)?
     var onRestart: (() -> Void)?
+    var onSetLaunchAtLogin: ((Bool) throws -> Void)?
+    var onOpenLoginItems: (() -> Void)?
     private let recorder = InputRecorder()
     private var draft = InputConfiguration.standard
     private var original: InputConfiguration?
@@ -31,6 +35,9 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
     private let summary = NSTextField(wrappingLabelWithString: "")
     private let detection = NSTextField(labelWithString: "")
     private let runSwitch = NSSwitch()
+    private let loginSwitch = NSSwitch()
+    private let loginStatus = NSTextField(wrappingLabelWithString: "")
+    private let loginSettings = NSButton(title: L("ログイン項目を開く…"), target: nil, action: nil)
     private let permissionDetails = NSStackView()
     private let inputSections = NSStackView()
     private let tabs = NSTabView()
@@ -185,7 +192,20 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
                  button(L("アプリを再起動"), #selector(restart))]),
             note(L("言語の変更は保存後、アプリを再起動すると反映されます。"))
         ], spacing: 8)
-        for view in [bindings, divider(), timing, divider(), language] {
+        loginSwitch.target = self
+        loginSwitch.action = #selector(toggleLaunchAtLogin)
+        loginSwitch.setAccessibilityLabel(L("ログイン時に起動"))
+        loginSettings.target = self
+        loginSettings.action = #selector(openLoginItems)
+        loginSettings.bezelStyle = .rounded
+        loginSettings.isHidden = true
+        loginStatus.font = .systemFont(ofSize: 12)
+        loginStatus.textColor = .secondaryLabelColor
+        let login = vertical([
+            row([NSTextField(labelWithString: L("ログイン時に起動")), loginSwitch, spacer(), loginSettings]),
+            loginStatus
+        ], spacing: 8)
+        for view in [bindings, divider(), timing, divider(), language, divider(), login] {
             inputSections.addArrangedSubview(view)
             view.widthAnchor.constraint(equalTo: inputSections.widthAnchor).isActive = true
         }
@@ -343,6 +363,21 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
         detection.stringValue = L("Mission Controlの検知: %@", status.detection)
         detection.textColor = .secondaryLabelColor
         runSwitch.state = status.running ? .on : .off
+        // Approval-pending items are registered and can still be switched off.
+        loginSwitch.state = status.loginItem == .enabled || status.loginItem == .requiresApproval ? .on : .off
+        loginSettings.isHidden = status.loginItem != .requiresApproval
+        switch status.loginItem {
+        case .enabled:
+            loginStatus.stringValue = L("ログイン時に自動起動します。変更はすぐに反映されます。")
+        case .requiresApproval:
+            loginStatus.stringValue = L("自動起動には、システム設定のログイン項目で許可が必要です。")
+        case .notRegistered:
+            loginStatus.stringValue = L("ログイン時に自動起動しません。変更はすぐに反映されます。")
+        case .notFound:
+            loginStatus.stringValue = L("アプリが見つかりません。DeskSway.appをアプリケーションから開いてください。")
+        @unknown default:
+            loginStatus.stringValue = L("ログイン項目の状態を確認できません。")
+        }
         for (index, item) in [(axStatus, status.accessibility), (listenStatus, status.listening), (postStatus, status.posting)].enumerated() {
             let (field, allowed) = item
             let indicator = permissionIndicators[index]
@@ -393,6 +428,17 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
     @objc private func recordRightScroll() { record(.scroll, direction: .right) }
     @objc private func cancelRecording() { recorder.cancel() }
     @objc private func toggleRun() { recorder.stop(); onToggleRunning?() }
+    @objc private func toggleLaunchAtLogin() {
+        recorder.stop()
+        do {
+            try onSetLaunchAtLogin?(loginSwitch.state == .on)
+            onRefresh?()
+        } catch {
+            onRefresh?()
+            setMessage(L("ログイン時の起動を変更できませんでした: %@", error.localizedDescription), error: true)
+        }
+    }
+    @objc private func openLoginItems() { recorder.stop(); onOpenLoginItems?() }
     @objc private func accessibility() { recorder.stop(); onAccessibility?() }
     @objc private func inputMonitoring() { recorder.stop(); onInputMonitoring?() }
     @objc private func posting() {

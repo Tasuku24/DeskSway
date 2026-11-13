@@ -1,6 +1,6 @@
 # DeskSway
 
-A small native macOS menu-bar app that turns horizontal wheel-style scrolling into Space shortcuts while Mission Control is detected. Swift, AppKit and public ApplicationServices APIs; no external packages, network service, analytics, updater or automatic login item.
+A small native macOS menu-bar app that turns horizontal wheel-style scrolling into Space shortcuts while Mission Control is detected. Swift, AppKit and public ApplicationServices APIs; no external packages, network service, analytics or updater. Optional launch at login uses macOS Service Management.
 
 English and Japanese settings, directly recorded shortcuts and scroll directions, and a configurable repeat delay are included. On 2026-11-05, the maintainer reported that all real-device acceptance checks had passed in their environment. This does not establish compatibility with every Mac, mouse or macOS version. The [stage 1 report](docs/phase1-validation.ja.md) and [stage 2 report](docs/stage2-validation.ja.md) retain the earlier development evidence and its limits.
 
@@ -43,7 +43,7 @@ Building from source does not require a paid Apple Developer Program membership.
 
 **Permission troubleshooting:** Key posting uses `CGRequestPostEventAccess`; requesting Accessibility alone is not a substitute for that request. If Accessibility and Input Monitoring are recognized but key posting is not, use **キー送信を許可…** and follow macOS’s instructions, then recheck/restart if needed. An enabled switch in System Settings does not guarantee that the current binary is authorized. During this trial, macOS explicitly logged a code-requirement mismatch between a previous DeskSway grant and the rebuilt ad-hoc binary. If the app still reports missing permission, remove the old DeskSway entry from the affected privacy list, add the current app shown by **アプリの場所を表示**, grant access, then restart. Do this yourself in System Settings; DeskSway never changes TCC records or bypasses authorization. Ad-hoc rebuilds can require repeating this step. A stable certificate-backed signing setup is not included in this local trial.
 
-The run/pause choice and shortcuts are saved locally in standard Preferences under `local.DeskSway`. Settings are never written to the repository. Opening settings does not stop conversion; unsaved changes require confirmation before closing. On later launches the prior run preference is restored, but conversion still waits for all readiness conditions. Login at startup is not enabled; you can add the app through macOS Login Items yourself if wanted.
+The run/pause choice and shortcuts are saved locally in standard Preferences under `local.DeskSway`. Settings are never written to the repository. Opening settings does not stop conversion; unsaved changes require confirmation before closing. On later launches the prior run preference is restored, but conversion still waits for all readiness conditions. Use **General → Launch at login / 一般 → ログイン時に起動** to enable or disable automatic startup. This switch applies immediately without Save, independently of shortcut edits. It reflects the macOS login-item status; if approval is required, use **Open Login Items… / ログイン項目を開く…** to allow DeskSway in System Settings. No login item is registered until you enable the switch. Run the signed `.app` bundle from a stable location such as Applications; a bare `swift run` executable cannot register as the app.
 
 ## Input protection and limits
 
@@ -60,7 +60,7 @@ The run/pause choice and shortcuts are saved locally in standard Preferences und
 
 `Sources/DeskSwayCore` owns input policy, shortcut validation, CGEvent preparation and the shared AX reader. `Sources/DeskSway` owns the unified settings, short-lived recorder, main-thread menu, runtime event tap and lifecycle; AX IPC runs separately. The [read-only probe](probes/mission-control/README.md) uses the same reader but does not link the input adapter or install a tap. Tests construct events but never post them.
 
-To remove the app, quit it and remove the built `.app`. Remove any permission or login-item entries you added through System Settings. Preferences may be retained; deleting the `local.DeskSway` preferences domain separately resets local settings. No background helper, launch agent or service is installed.
+To remove the app, turn off **Launch at login** in General, quit it and remove the built `.app`. Remove any permission or login-item entries you added through System Settings. Preferences may be retained; deleting the `local.DeskSway` preferences domain separately resets local settings. No separate background helper or launch agent is installed.
 
 Source is maintained in [Tasuku24/DeskSway](https://github.com/Tasuku24/DeskSway) under the [MIT License](LICENSE). Local ad-hoc builds are not Developer ID-signed or notarized distributions.
 
