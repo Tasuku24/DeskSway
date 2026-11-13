@@ -70,9 +70,9 @@ Run the checks and package an app separately from the local test copy:
 
 ```sh
 swift test
-./scripts/package-release.sh 0.1.0-beta.1
+./scripts/package-release.sh 0.2.0-beta.1
 ```
 
 The packaging script creates an app ZIP and a matching SHA-256 checksum under `.build/releases/`. The ZIP includes the app, MIT license and bilingual installation guide. It does not overwrite an existing asset or register/replace the running local app. Run it on Apple Silicon for the initial arm64 release. Version labels must match `CFBundleShortVersionString` in `Resources/Info.plist`, optionally with a prerelease suffix.
 
-For the first preview, create a draft GitHub Release for tag `v0.1.0-beta.1` at the verified commit, use the [release notes](docs/releases/v0.1.0-beta.1.md), and attach the ZIP and checksum. Mark it as a prerelease. Making the repository public and publishing the release are separate final steps.
+For this preview, create a draft GitHub Release for tag `v0.2.0-beta.1` at the verified commit, use the [release notes](docs/releases/v0.2.0-beta.1.md), and attach the ZIP and checksum. Mark it as a prerelease, then publish after verifying the uploaded assets.
