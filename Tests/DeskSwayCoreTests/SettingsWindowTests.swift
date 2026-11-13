@@ -177,12 +177,12 @@ final class SettingsWindowTests: XCTestCase {
         controller.update(SettingsStatus(running: true, accessibility: true, listening: true, posting: true,
                                          summary: "待機中", detection: "通常画面（変換対象外）"))
         for (name, appearance, size, expanded) in [
-            ("light", NSAppearance.Name.aqua, NSSize(width: 800, height: 700), false),
-            ("dark", NSAppearance.Name.darkAqua, NSSize(width: 800, height: 700), false),
-            ("approval", NSAppearance.Name.aqua, NSSize(width: 800, height: 700), false),
-            ("expanded", NSAppearance.Name.aqua, NSSize(width: 800, height: 700), true),
+            ("light", NSAppearance.Name.aqua, window.contentMinSize, false),
+            ("dark", NSAppearance.Name.darkAqua, window.contentMinSize, false),
+            ("approval", NSAppearance.Name.aqua, window.contentMinSize, false),
+            ("expanded", NSAppearance.Name.aqua, window.contentMinSize, true),
             ("larger", NSAppearance.Name.aqua, NSSize(width: 1000, height: 850), false),
-            ("minimum-again", NSAppearance.Name.darkAqua, NSSize(width: 800, height: 700), true)
+            ("minimum-again", NSAppearance.Name.darkAqua, window.contentMinSize, true)
         ] {
             controller.update(settingsStatus(loginItem: name == "approval" ? .requiresApproval : .enabled))
             window.appearance = NSAppearance(named: appearance)
@@ -208,6 +208,10 @@ final class SettingsWindowTests: XCTestCase {
                 where !control.isHiddenOrHasHiddenAncestor {
                 XCTAssertTrue(selectedContent.bounds.contains(control.convert(control.bounds, to: selectedContent)),
                               "Control must fit its tab at \(name) size: \(control)")
+                if let label = control as? NSTextField, !label.stringValue.isEmpty {
+                    XCTAssertGreaterThanOrEqual(label.bounds.height, label.intrinsicContentSize.height,
+                                                "Text must remain readable at \(name) size: \(label.stringValue)")
+                }
             }
         }
     }

@@ -63,11 +63,11 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
     private let repeatValue = NSTextField(labelWithString: "")
 
     init() {
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 700),
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 780),
                               styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         window.title = L("DeskSway — 設定")
         window.isReleasedWhenClosed = false
-        window.contentMinSize = NSSize(width: 800, height: 700)
+        window.contentMinSize = NSSize(width: 800, height: 780)
         window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
         super.init(window: window)
         window.delegate = self
@@ -210,7 +210,7 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
             view.widthAnchor.constraint(equalTo: inputSections.widthAnchor).isActive = true
         }
         let permissions = vertical([permissionSummary, permissionDetails], spacing: 16)
-        let tabHeight: CGFloat = 430
+        let tabHeight: CGFloat = 510
         // AppKit sizes inserted tab contents before the first Auto Layout pass.
         // Seed both tabs with real geometry, including the initially hidden tab.
         tabs.setFrameSize(NSSize(width: content.bounds.width - 56, height: tabHeight))
